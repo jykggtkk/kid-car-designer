@@ -1,0 +1,22 @@
+{
+  "_说明": "可选：把本文件复制成 config.json 可设置『默认』参数（适用于自己部署时不想到页面里填的场景）。仓库里不要提交 config.json，.gitignore 已忽略它。",
+
+  "PROVIDER": "mock",
+  "_PROVIDER可选值": "ark（火山方舟·豆包 Seedream）| openai（OpenAI 或兼容网关）| tencent（腾讯混元生图）| mock（本地试玩，不出 AI 图）",
+
+  "ARK_BASE_URL": "https://ark.cn-beijing.volces.com/api/v3",
+  "ARK_IMAGE_MODEL": "doubao-seedream-5-0-260128",
+  "ARK_IMAGE_SIZE": "2K",
+  "ARK_USE_SKETCH": "true",
+
+  "OPENAI_BASE_URL": "https://api.openai.com/v1",
+  "OPENAI_IMAGE_MODEL": "gpt-image-1",
+
+  "TENCENT_HOST": "hunyuan.tencentcloudapi.com",
+  "TENCENT_SERVICE": "hunyuan",
+  "TENCENT_VERSION": "2023-09-01",
+  "TENCENT_SUBMIT_ACTION": "SubmitHunyuanImageJob",
+  "TENCENT_QUERY_ACTION": "QueryHunyuanImageJob",
+
+  "TIMEOUT_MS": "180000"
+}

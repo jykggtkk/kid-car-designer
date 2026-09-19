@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 汽车设计工坊 · 小小汽车设计师</title>
+<style>
+:root{
+  --bg:#070b14; --card:rgba(16,24,42,.72); --card-solid:#0f1729; --ink:#e7eefb; --sub:#8ea3c0;
+  --line:rgba(120,180,255,.16); --line-strong:rgba(34,211,238,.45);
+  --brand:#22d3ee; --brand2:#7c5cff; --brand-soft:rgba(34,211,238,.12);
+  --ok:#34d399; --warn:#fbbf24;
+  --radius:16px; --shadow:0 12px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 560px at 12% -8%, rgba(124,92,255,.20), transparent 60%),
+    radial-gradient(900px 520px at 96% 2%, rgba(34,211,238,.16), transparent 55%),
+    linear-gradient(180deg,#070b14 0%,#0a1020 55%,#060a12 100%);
+  background-attachment:fixed;
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.32;
+  background-image:linear-gradient(rgba(120,180,255,.06) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(120,180,255,.06) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(1000px 700px at 50% 0%,#000 20%,transparent 85%);}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:18px 16px 60px}
+
+/* header */
+header.hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.brandmark{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(124,92,255,.22));border:1px solid var(--line-strong);
+  box-shadow:0 0 22px rgba(34,211,238,.18)}
+h1{font-size:21px;margin:0;letter-spacing:.5px;
+  background:linear-gradient(90deg,#22d3ee,#7c5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{font-size:12px;color:var(--sub);margin-top:2px}
+.hd-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font-size:12px;padding:5px 11px;border-radius:999px;background:var(--brand-soft);color:var(--brand);
+  border:1px solid var(--line-strong);box-shadow:0 0 14px rgba(34,211,238,.15)}
+.badge.off{color:var(--warn);background:rgba(251,191,36,.10);border-color:rgba(251,191,36,.35);box-shadow:none}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{font-size:14px;font-weight:700;padding:10px 18px;border-radius:12px;cursor:pointer;
+  background:rgba(255,255,255,.04);color:var(--sub);border:1px solid var(--line);font-family:inherit}
+.tab:hover{border-color:var(--line-strong)}
+.tab.on{background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(124,92,255,.20));
+  color:var(--ink);border-color:var(--line-strong);box-shadow:0 0 18px rgba(34,211,238,.15)}
+.tab .mini{font-size:11.5px;color:var(--sub);font-weight:400;margin-left:6px}
+.tab.on .mini{color:var(--brand)}
+
+/* layout：画布在左，配置在右 */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;align-items:start}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);
+  margin-bottom:14px;backdrop-filter:blur(10px)}
+.card h2{font-size:15px;margin:0 0 3px;display:flex;align-items:center;gap:8px}
+.card h2 .ic{color:var(--brand);display:flex}
+.card .tip{font-size:12px;color:var(--sub);margin:0 0 10px}
+.sec{font-size:12.5px;font-weight:700;color:#b9c9e2;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.sec:first-child{margin-top:2px}
+.sec .dot{width:6px;height:6px;border-radius:50%;background:var(--brand);box-shadow:0 0 8px var(--brand)}
+.sec .note{font-weight:400;color:var(--sub);font-size:11px}
+
+/* chips */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;cursor:pointer;
+  background:rgba(255,255,255,.03);transition:.15s;user-select:none;position:relative}
+.opt:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+.opt .em{display:flex;justify-content:center;color:#9fd8ff}
+.opt .lb{font-size:12px;margin-top:4px;display:block;line-height:1.2}
+.opt.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);box-shadow:0 0 16px rgba(34,211,238,.18)}
+.opt.on .em{color:var(--brand)}
+.opt .rec{position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--brand2);
+  box-shadow:0 0 8px var(--brand2)}
+.swatches{display:flex;gap:12px;flex-wrap:wrap;padding-bottom:18px}
+.sw{width:38px;height:38px;border-radius:11px;border:2px solid #0b1220;box-shadow:0 0 0 2px rgba(120,180,255,.20);
+  cursor:pointer;position:relative}
+.sw.on{box-shadow:0 0 0 3px var(--brand),0 0 16px rgba(34,211,238,.35)}
+.sw span{position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;font-size:10.5px;color:var(--sub);white-space:nowrap}
+
+/* canvas */
+.canvasbox{position:relative;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#0c1526,#080e1a);border:1px dashed rgba(34,211,238,.35);box-shadow:inset 0 0 40px rgba(34,211,238,.06)}
+canvas#draw{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.hint{font-size:12.5px;color:var(--warn);min-height:18px;margin-top:8px}
+.hint.ok{color:var(--ok)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+button{font-family:inherit;font-size:13.5px;font-weight:600;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;
+  background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line)}
+button:hover{border-color:var(--line-strong)}
+button.primary{background:linear-gradient(135deg,#22d3ee,#7c5cff);color:#04121c;border:none;box-shadow:0 6px 20px rgba(34,211,238,.25)}
+button.ghost{background:rgba(255,255,255,.03);color:var(--sub)}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+button.big{padding:13px 22px;font-size:15px}
+button.wide{width:100%}
+
+/* result */
+.resultgrid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+@media(max-width:860px){.resultgrid{grid-template-columns:1fr}}
+#shot{width:100%;border-radius:14px;border:1px solid var(--line);background:#0b1220;display:block;min-height:120px}
+.promptbox{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:9px;font-size:11.5px;color:var(--sub);
+  max-height:130px;overflow:auto;white-space:pre-wrap;line-height:1.55}
+canvas#sign{width:100%;height:auto;border:1px dashed rgba(34,211,238,.35);border-radius:12px;background:#080e1a;touch-action:none;cursor:crosshair}
+input.txt{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit;
+  margin-top:10px;background:rgba(255,255,255,.04);color:var(--ink);outline:none}
+input.txt:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+.loader{display:none;text-align:center;padding:26px 0;color:var(--sub)}
+.loader.on{display:block}
+.spin{width:40px;height:40px;border:3px solid rgba(120,180,255,.18);border-top-color:var(--brand);border-radius:50%;margin:0 auto 10px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.smallnote{font-size:12px;color:var(--sub);margin-top:8px}
+.sketchflag{font-size:11.5px;color:var(--brand);margin-top:6px}
+
+/* wall */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.wall figure{margin:0;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  background:#0b1220;cursor:pointer;animation:fadeUp .55s ease both;transition:.15s}
+.wall figure:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.wall img{width:100%;display:block}
+.wall figcaption{position:absolute;left:0;right:0;bottom:0;font-size:10.5px;color:#cfe0f5;
+  background:linear-gradient(180deg,rgba(6,10,18,0),rgba(6,10,18,.85));padding:10px 8px 6px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.empty{font-size:12.5px;color:var(--sub);padding:10px 0}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(4,7,13,.82);backdrop-filter:blur(6px);
+  overflow:auto;padding:26px 16px}
+.modal.on{display:block}
+.modal-inner{max-width:1060px;margin:0 auto;background:var(--card-solid);border:1px solid var(--line);
+  border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.modal-hd h3{margin:0;font-size:16px}
+.modal-hd button{margin-left:auto}
+.lightbox{display:none;position:fixed;inset:0;z-index:60;background:rgba(4,7,13,.9);padding:24px;
+  align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.lightbox.on{display:flex}
+.lightbox img{max-width:92vw;max-height:74vh;border-radius:12px;border:1px solid var(--line)}
+footer{text-align:center;color:var(--sub);font-size:12px;margin-top:22px}
+/* settings */
+.setrow{margin-bottom:12px}
+.setrow label{display:block;font-size:12.5px;color:#b9c9e2;margin-bottom:6px}
+select.txt,input.txt{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+  font-size:14px;font-family:inherit;background:#0b1220;color:var(--ink)}
+.setnote{font-size:11.5px;color:var(--sub);margin-top:6px;line-height:1.7}
+.setnote b{color:#22d3ee;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hd">
+    <div class="brandmark"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15h20"/><path d="M4 15l2-5h12l2 5"/><circle cx="7" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/></svg></div>
+    <div>
+      <h1>AI 汽车设计工坊</h1>
+      <div class="tagline">画一条线，让 AI 帮你造一辆车 ✨</div>
+    </div>
+    <div class="hd-right">
+      <span class="badge off" id="modeBadge">未连接本地服务</span>
+      <button id="setBtn">⚙ 设置模型</button>
+      <button id="wallBtn">🖼 汽车图片墙</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab on" id="tabDesign">🚗 设计工坊</button>
+    <button class="tab" id="tabWork">🖼 我的作品<span class="mini" id="tabWorkCount"></span></button>
+  </nav>
+
+  <!-- ============ 第 1 页：设计工坊（画布左 / 配置右） ============ -->
+  <div id="viewDesign">
+    <div class="layout">
+      <!-- 左：画轮廓 -->
+      <div>
+        <section class="card">
+          <h2><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M5 8l14 8M19 8L5 16"/></svg></span>画一条线，把车尾连到车头</h2>
+          <p class="tip">从一个 ⭐起点 出发，沿着想象中的车顶，一笔画到另一个 ⭐终点。你画的这条线会原样交给 AI 当设计稿。</p>
+          <div class="canvasbox"><canvas id="draw"></canvas></div>
+          <div class="hint" id="drawHint"></div>
+          <div class="toolbar">
+            <button class="ghost" id="clearBtn">🧽 擦掉重画</button>
+            <button class="ghost" id="randBtn">🎲 随机灵感</button>
+            <button class="primary big" id="genBtn" disabled>✨ AI 设计我的车</button>
+          </div>
+          <div class="smallnote" id="sketchTip"></div>
+        </section>
+      </div>
+
+      <!-- 右：配置 -->
+      <div>
+        <section class="card">
+          <h2><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>我的配置</h2>
+
+          <div class="sec"><span class="dot"></span>车型</div>
+          <div class="grid" id="types"></div>
+
+          <div class="sec"><span class="dot"></span>颜色</div>
+          <div class="swatches" id="colors"></div>
+
+          <div class="sec"><span class="dot"></span>风格</div>
+          <div class="grid" id="styles"></div>
+
+          <div class="sec"><span class="dot"></span>脑洞等级<span class="note">· 越大胆越超出想象</span></div>
+          <div class="grid" id="imagine"></div>
+
+          <div class="sec"><span class="dot"></span>小配件（<span id="exCount">0</span>）<span class="note">· 亮点为当前风格推荐</span></div>
+          <div class="grid" id="extras"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 第 2 页：我的设计 + 最近作品 ============ -->
+  <div id="viewWork" style="display:none">
+    <section class="card" id="resultCard">
+      <h2><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/></svg></span>我的设计</h2>
+      <div class="hint" id="errTip"></div>
+      <div class="loader" id="loader"><div class="spin"></div><div id="loadTxt">AI 正在调色、建模、打光…</div></div>
+      <div class="empty" id="noDesign">还没有作品～ 回到「设计工坊」画一条线，再点「AI 设计我的车」。</div>
+      <div class="resultgrid" id="resultBox" style="display:none">
+        <div>
+          <img id="shot" alt="AI 设计的汽车">
+          <div class="sketchflag" id="sketchFlag"></div>
+        </div>
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:#b9c9e2;margin:2px 0 6px">签上你的名字（会变彩色小字放在图的右上角；不签则用名字代替）</div>
+          <canvas id="sign"></canvas>
+          <input class="txt" id="nameInput" placeholder="名字（只记在文件名里，不印在图上）" maxlength="12">
+          <div class="toolbar">
+            <button class="ghost" id="clearSign">🧽 重写</button>
+            <button class="primary" id="composeBtn">🖼 生成最终图片</button>
+            <button class="ghost" id="dlBtn" disabled>⬇️ 下载</button>
+          </div>
+          <div class="toolbar" style="margin-top:8px">
+            <button class="ghost" id="againBtn">🔁 换一版</button>
+            <button class="ghost" id="backDesign">✏️ 改配置重画</button>
+            <button class="ghost" id="togglePrompt">查看设计说明</button>
+          </div>
+          <div class="promptbox" id="promptTxt" style="display:none;margin-top:8px"></div>
+          <div class="smallnote" id="dlTip">签名后点「生成最终图片」，确认满意再下载。</div>
+        </div>
+      </div>
+      <div id="finalWrap" style="display:none;margin-top:14px">
+        <div style="font-size:12.5px;font-weight:700;color:#b9c9e2;margin-bottom:6px">最终作品（每次生成会覆盖上一版）</div>
+        <img id="finalPreview" style="width:100%;border-radius:14px;border:1px solid var(--line);display:block">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></span>最近作品</h2>
+      <p class="tip">最新的 10 张，点右上角「汽车图片墙」看全部</p>
+      <div class="wall" id="recentWall"></div>
+      <div class="empty" id="recentEmpty">还没有作品，先设计一辆吧～</div>
+    </section>
+  </div>
+
+  <footer>AI 汽车设计工坊 · 作品与 API Key 都只保存在你自己这台电脑上 · 大模型由使用者自行配置</footer>
+</div>
+
+<!-- 照片墙弹层 -->
+<div class="modal" id="wallModal">
+  <div class="modal-inner">
+    <div class="modal-hd">
+      <h3>🖼 汽车图片墙</h3>
+      <span class="badge" id="wallCount">0 张</span>
+      <button id="closeWall">关闭 ✕</button>
+    </div>
+    <div class="wall" id="allWall"></div>
+    <div class="empty" id="allEmpty">还没有作品～</div>
+  </div>
+</div>
+
+<!-- 模型设置弹层 -->
+<div class="modal" id="setModal">
+  <div class="modal-inner" style="max-width:560px">
+    <div class="modal-hd">
+      <h3>⚙ 设置大模型</h3>
+      <span class="badge" id="setState">未配置</span>
+      <button id="closeSet">关闭 ✕</button>
+    </div>
+
+    <div class="setrow">
+      <label>模型服务商</label>
+      <select class="txt" id="setProvider">
+        <option value="ark">火山方舟 · 豆包 Seedream（推荐，中文效果好）</option>
+        <option value="openai">OpenAI 兼容接口（gpt-image-1 / 任意兼容网关）</option>
+        <option value="tencent">腾讯混元生图</option>
+        <option value="mock">本地试玩（不用 Key，不出 AI 图）</option>
+      </select>
+    </div>
+
+    <div class="setrow" id="rowKey">
+      <label>API Key</label>
+      <input class="txt" id="setKey" type="password" placeholder="粘贴你自己的 API Key" autocomplete="off">
+    </div>
+
+    <div class="setrow" id="rowTencent" style="display:none">
+      <label>SecretId</label>
+      <input class="txt" id="setSecretId" placeholder="腾讯云 SecretId" autocomplete="off">
+      <label style="margin-top:8px">SecretKey</label>
+      <input class="txt" id="setSecretKey" type="password" placeholder="腾讯云 SecretKey" autocomplete="off">
+    </div>
+
+    <div class="setrow">
+      <label>模型 ID</label>
+      <input class="txt" id="setModel" placeholder="留空则用默认模型" autocomplete="off">
+    </div>
+
+    <div class="setrow">
+      <label>接口地址 Base URL（可选，一般不用改）</label>
+      <input class="txt" id="setBase" placeholder="留空则用默认地址" autocomplete="off">
+    </div>
+
+    <div class="toolbar">
+      <button class="primary" id="saveSet">💾 保存并使用</button>
+      <button class="ghost" id="clearSet">🗑 清除本机配置</button>
+    </div>
+
+    <div class="setnote" id="setNote"></div>
+  </div>
+</div>
+
+<!-- 大图查看 -->
+<!-- 单图放大 -->
+<div class="lightbox" id="lightbox">
+  <img id="lightImg" alt="作品">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="primary" id="lightDl">⬇️ 下载这张</button>
+    <button id="lightClose">关闭 ✕</button>
+  </div>
+</div>
+
+<script>
+/* ================= 科技风 SVG 图标 ================= */
+const ICONS = {
+  sedan:'<path d="M2 15h20"/><path d="M4 15l2-5h12l2 5"/><circle cx="7" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/>',
+  suv:'<path d="M2 15h20"/><path d="M3 15l1.5-6h13l2.5 6"/><path d="M9 9V5.5h5V9"/><circle cx="7.5" cy="16.5" r="2.2"/><circle cx="16.5" cy="16.5" r="2.2"/>',
+  offroad:'<path d="M2 14h20"/><path d="M4 14l1-5h12l2 5"/><path d="M7.5 9V5h8v4"/><path d="M1 11.5h3"/><circle cx="7" cy="15.5" r="2.8"/><circle cx="17" cy="15.5" r="2.8"/>',
+  sports:'<path d="M2 15h20"/><path d="M4 15c1-4 4-6.5 8-6.5s7 2.5 8 6.5"/><path d="M12 8.5v6"/><circle cx="7" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/>',
+  camper:'<path d="M2 15h20"/><path d="M3 15V7h11l4 4.5V15"/><path d="M6 10h4v3H6z"/><circle cx="7.5" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/>',
+  fire:'<path d="M2 15h20"/><path d="M3 15V8h12v7"/><path d="M15 10.5h4l2 4.5"/><path d="M6 11h3v2H6z"/><path d="M4 4.5h4v2.5H4z"/><circle cx="7.5" cy="16.5" r="2"/><circle cx="17.5" cy="16.5" r="2.2"/>',
+  bus:'<path d="M2 15h20"/><path d="M3 15V5.5h18V15"/><path d="M6 8h3.5v3.5H6z"/><path d="M12.5 8H16v3.5h-3.5z"/><circle cx="7" cy="16.5" r="2"/><circle cx="17" cy="16.5" r="2"/>',
+  concept:'<path d="M2 15h20"/><path d="M4 15c0-5 3-7.5 8-7.5s8 2.5 8 7.5"/><path d="M8 11h8"/><path d="M12 7.5V3.5"/><circle cx="7.5" cy="16.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
+  truck:'<path d="M2 15h20"/><path d="M2 15V9h11v6"/><path d="M13 11h4l3 4"/><circle cx="6.5" cy="16.5" r="2"/><circle cx="16.5" cy="16.5" r="2.2"/><circle cx="20" cy="16.5" r="1.8"/>',
+  cyber:'<path d="M12 2.5v19M2.5 12h19"/><circle cx="12" cy="12" r="4"/><path d="M5.5 5.5l3 3M18.5 5.5l-3 3M5.5 18.5l3-3M18.5 18.5l-3-3"/>',
+  future:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c4 4 4 13 0 17-4-4-4-13 0-17z"/><path d="M3.5 12h17"/>',
+  retro:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/>',
+  anime:'<path d="M12 3.5l2.4 5.2 5.7.8-4.2 4 1.1 5.7L12 16.5l-5 2.7 1.1-5.7-4.2-4 5.7-.8z"/>',
+  sport:'<path d="M4 20h5l2.5-9"/><path d="M11.5 11h9"/><path d="M20.5 7v8"/><circle cx="19" cy="5" r="1.8"/>',
+  minecraft:'<path d="M4.5 4.5h15v15h-15z"/><path d="M4.5 10h15M4.5 15h15M10 4.5v15M15 4.5v15"/>',
+  wing:'<path d="M3 12h18"/><path d="M16 12l5-3"/><path d="M6 12v4"/>',
+  rack:'<path d="M4 10.5h16"/><path d="M6.5 10.5V6h11v4.5"/><path d="M9.5 6V4h5v2"/>',
+  bigwheel:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  neon:'<path d="M4 16.5h16"/><path d="M4 16.5c2-8 14-8 16 0"/>',
+  star:'<path d="M12 3.5l2.4 5.2 5.7.8-4.2 4 1.1 5.7L12 16.5l-5 2.7 1.1-5.7-4.2-4 5.7-.8z"/>',
+  flame:'<path d="M12 3c3.2 4 5.2 6.2 5.2 9.2A5.2 5.2 0 0 1 6.8 12.2C6.8 9.2 8.8 7 12 3z"/>',
+  antenna:'<path d="M12 20.5V8"/><path d="M8 8h8"/><circle cx="12" cy="5" r="1.6"/>',
+  spotlight:'<path d="M6.5 10.5L3 8l12-5.5 3 2.5z"/><path d="M9 12.5l4 8"/>',
+  bumper:'<path d="M3 14h18"/><path d="M3 14v4M21 14v4"/><path d="M8 14v3M16 14v3"/>',
+  sunroof:'<path d="M6 8h12l-2 5.5H8z"/><path d="M4 16h16"/>',
+  rocket:'<path d="M12 3c3 3.2 4.2 7 4.2 10L12 17.5 7.8 13c0-3 1.2-6.8 4.2-10z"/><circle cx="12" cy="11" r="1.7"/>',
+  pixel:'<path d="M4.5 4.5h6.5v6.5H4.5z"/><path d="M13 13h6.5v6.5H13z"/><path d="M13 4.5h6.5"/><path d="M4.5 13h6.5"/>',
+  cloud:'<path d="M6.5 15.5a3 3 0 0 1 .3-6 4 4 0 0 1 7.6-.6 3 3 0 0 1 .6 6.6z"/><path d="M3.5 18h16"/>',
+  bolt:'<path d="M13 2.5L6.5 13.5H11l-1.5 8 8.5-11.5H13.5z"/>',
+  stripe:'<path d="M3 8h18M3 12h18M3 16h18"/>',
+  lvl1:'<path d="M4 14.5h16"/><path d="M5.5 14.5l2-5.5h9l2 5.5"/><circle cx="8.5" cy="16" r="1.7"/><circle cx="15.5" cy="16" r="1.7"/>',
+  lvl2:'<circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>',
+  lvl3:'<path d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4L12 20.5 9.6 13.9 3 11.5l6.6-2.4z"/><path d="M19 17.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
+};
+const svgIcon = (n,s)=>'<svg viewBox="0 0 24 24" width="'+(s||26)+'" height="'+(s||26)+'" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+ICONS[n]+'</svg>';
+
+/* ================= 配置字典 ================= */
+const CAR_TYPES = [
+  {id:'sedan',  icon:'sedan',  label:'小轿车', en:'modern sedan'},
+  {id:'suv',    icon:'suv',    label:'SUV',    en:'modern family SUV'},
+  {id:'offroad',icon:'offroad',label:'越野车', en:'rugged off-road 4x4'},
+  {id:'sports', icon:'sports', label:'跑车',   en:'low-slung sports car'},
+  {id:'camper', icon:'camper', label:'房车',   en:'camper van'},
+  {id:'fire',   icon:'fire',   label:'消防车', en:'fire rescue truck'},
+  {id:'bus',    icon:'bus',    label:'公交车', en:'city bus'},
+  {id:'concept',icon:'concept',label:'概念车', en:'futuristic concept car'},
+  {id:'truck',  icon:'truck',  label:'卡车',   en:'heavy pickup truck'},
+];
+const STYLES = [
+  {id:'cyber',    icon:'cyber',    label:'赛博朋克', en:'cyberpunk'},
+  {id:'future',   icon:'future',   label:'未来科技', en:'futuristic'},
+  {id:'retro',    icon:'retro',    label:'复古经典', en:'vintage classic'},
+  {id:'anime',    icon:'anime',    label:'卡通动漫', en:'anime style'},
+  {id:'sport',    icon:'sport',    label:'极速运动', en:'motorsport'},
+  {id:'minecraft',icon:'minecraft',label:'我的世界', en:'Minecraft voxel'},
+];
+const IMAGINE = [
+  {id:'calm', icon:'lvl1', label:'稳妥好看', en:'tasteful'},
+  {id:'bold', icon:'lvl2', label:'大胆创意', en:'bold imaginative'},
+  {id:'wild', icon:'lvl3', label:'狂想未来', en:'wild futuristic'},
+];
+const COLORS = [
+  {name:'烈焰红', hex:'#e8453c'}, {name:'柠檬黄', hex:'#f5c518'},
+  {name:'海洋蓝', hex:'#2f7de1'}, {name:'薄荷绿', hex:'#3fb950'},
+  {name:'葡萄紫', hex:'#8b5cf6'}, {name:'樱花粉', hex:'#ff8fc7'},
+  {name:'极光青', hex:'#22d3ee'}, {name:'月光银', hex:'#c3ccd8'},
+  {name:'曜石黑', hex:'#2b2f36'}, {name:'珍珠白', hex:'#f2f5f8'},
+];
+const EXTRAS = [
+  {id:'wing',     icon:'wing',     label:'炫酷尾翼',   rec:['sport','cyber','future']},
+  {id:'rack',     icon:'rack',     label:'车顶行李架', rec:['retro','minecraft','sport']},
+  {id:'bigwheel', icon:'bigwheel', label:'超大越野轮', rec:['cyber','minecraft','sport']},
+  {id:'neon',     icon:'neon',     label:'霓虹灯带',   rec:['cyber','future']},
+  {id:'star',     icon:'star',     label:'星星贴纸',   rec:['anime','retro']},
+  {id:'flame',    icon:'flame',    label:'火焰涂鸦',   rec:['sport','retro']},
+  {id:'antenna',  icon:'antenna',  label:'雷达天线',   rec:['future','cyber']},
+  {id:'spotlight',icon:'spotlight',label:'车顶探照灯', rec:['cyber','sport','future']},
+  {id:'bumper',   icon:'bumper',   label:'装甲护杠',   rec:['cyber','minecraft']},
+  {id:'sunroof',  icon:'sunroof',  label:'全景天窗',   rec:['future','retro']},
+  {id:'rocket',   icon:'rocket',   label:'火箭推进器', rec:['future','sport','anime']},
+  {id:'pixel',    icon:'pixel',    label:'像素方块',   rec:['minecraft']},
+  {id:'cloud',    icon:'cloud',    label:'祥云纹饰',   rec:['retro','anime']},
+  {id:'bolt',     icon:'bolt',     label:'闪电拉花',   rec:['sport','cyber']},
+  {id:'stripe',   icon:'stripe',   label:'赛车条纹',   rec:['sport','retro']},
+];
+
+/* ================= 状态 ================= */
+const state = {type:'sedan', color:COLORS[0], style:'cyber', imagine:'bold', extras:new Set(),
+               pts:[], img:null, prompt:'', provider:'local', composed:null, wallId:null, sketchUsed:false, signed:false};
+const $ = id => document.getElementById(id);
+const WALL_MAX = 40, RECENT_N = 10;
+
+/* ================= 视图切换 ================= */
+function showView(v){
+  const design = v==='design';
+  $('viewDesign').style.display = design?'':'none';
+  $('viewWork').style.display   = design?'none':'';
+  $('tabDesign').classList.toggle('on',design);
+  $('tabWork').classList.toggle('on',!design);
+  if(!design) renderWall();
+}
+$('tabDesign').onclick=()=>showView('design');
+$('tabWork').onclick=()=>showView('work');
+$('backDesign').onclick=()=>showView('design');
+
+/* ================= 选项渲染 ================= */
+function labelOf(list,id){return (list.find(o=>o.id===id)||{}).label||'';}
+function enOf(list,id){return (list.find(o=>o.id===id)||{}).en||'';}
+
+function renderChips(host, list, isOn, onClick){
+  host.innerHTML='';
+  list.forEach(o=>{
+    const d=document.createElement('div');
+    const rec = o.rec && o.rec.indexOf(state.style)>=0;
+    d.className='opt'+(isOn(o)?' on':'');
+    d.innerHTML='<span class="em">'+svgIcon(o.icon,26)+'</span><span class="lb">'+o.label+'</span>'+(rec?'<span class="rec"></span>':'');
+    d.onclick=()=>{onClick(o); refreshAll();};
+    host.appendChild(d);
+  });
+}
+function renderColors(){
+  const c=$('colors'); c.innerHTML='';
+  COLORS.forEach(col=>{
+    const d=document.createElement('div');
+    d.className='sw'+(state.color.hex===col.hex?' on':'');
+    d.style.background=col.hex;
+    d.innerHTML='<span>'+col.name+'</span>';
+    d.onclick=()=>{state.color=col; refreshAll();};
+    c.appendChild(d);
+  });
+}
+function renderExtras(){
+  const list = EXTRAS.slice().sort((a,b)=>{
+    const ra=a.rec.indexOf(state.style)>=0?0:1, rb=b.rec.indexOf(state.style)>=0?0:1;
+    return ra-rb;
+  });
+  renderChips($('extras'), list, o=>state.extras.has(o.id), o=>{
+    state.extras.has(o.id)?state.extras.delete(o.id):state.extras.add(o.id);
+  });
+  $('exCount').textContent=state.extras.size;
+}
+function refreshAll(){
+  renderChips($('types'), CAR_TYPES, o=>state.type===o.id, o=>state.type=o.id);
+  renderChips($('styles'), STYLES, o=>state.style===o.id, o=>state.style=o.id);
+  renderChips($('imagine'), IMAGINE, o=>state.imagine===o.id, o=>state.imagine=o.id);
+  renderColors();
+  renderExtras();
+  redraw();
+}
+
+$('randBtn').onclick=()=>{
+  state.type=CAR_TYPES[Math.floor(Math.random()*CAR_TYPES.length)].id;
+  state.style=STYLES[Math.floor(Math.random()*STYLES.length)].id;
+  state.color=COLORS[Math.floor(Math.random()*COLORS.length)];
+  state.extras=new Set();
+  const pool=EXTRAS.filter(e=>e.rec.indexOf(state.style)>=0);
+  const n=1+Math.floor(Math.random()*2);
+  for(let i=0;i<n;i++) state.extras.add(pool[Math.floor(Math.random()*pool.length)].id);
+  refreshAll();
+};
+
+/* ================= 画轮廓（画布 + 车底座） ================= */
+const cv=$('draw'), ctx=cv.getContext('2d');
+const W=960, H=420, BASE=330;
+const A={x:150,y:322}, B={x:812,y:322};
+const WHEELS=[{x:285,y:BASE+4,r:52},{x:678,y:BASE+4,r:52}];
+const dpr=Math.min(window.devicePixelRatio||1,2);
+cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
+
+function rrect(c,x,y,w,h,r){
+  c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();
+}
+function mark(p,txt){
+  const t=Date.now()/600, r=13+Math.sin(t)*2;
+  ctx.beginPath();ctx.arc(p.x,p.y,r+8,0,Math.PI*2);
+  ctx.fillStyle='rgba(34,211,238,.18)';ctx.fill();
+  ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+  ctx.fillStyle='#22d3ee';ctx.fill();
+  ctx.fillStyle='#04121c';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+  ctx.fillText('⭐',p.x,p.y+5);
+  ctx.fillStyle='#22d3ee';ctx.font='bold 14px sans-serif';
+  ctx.fillText(txt,p.x,p.y-24);
+}
+/* 车底座：地面 + 投影 + 底盘横梁 + 两个轮子 */
+function drawChassis(){
+  const GY=BASE+56;
+  ctx.fillStyle='#0a1220'; ctx.fillRect(0,GY,W,H-GY);
+  ctx.strokeStyle='rgba(34,211,238,.30)'; ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,GY);ctx.lineTo(W,GY);ctx.stroke();
+  ctx.strokeStyle='rgba(120,180,255,.07)';ctx.lineWidth=1;
+  for(let gx=0;gx<W;gx+=40){ctx.beginPath();ctx.moveTo(gx,GY);ctx.lineTo(gx,H);ctx.stroke();}
+
+  ctx.fillStyle='rgba(0,0,0,.55)';
+  ctx.beginPath();ctx.ellipse(480,GY+6,330,16,0,0,Math.PI*2);ctx.fill();
+
+  ctx.fillStyle='#4a5f80';
+  rrect(ctx,A.x,BASE-6,662,22,9); ctx.fill();
+  ctx.fillStyle='rgba(34,211,238,.55)';
+  rrect(ctx,A.x+4,BASE-3,654,4,2); ctx.fill();
+  ctx.fillStyle='#33455f';
+  rrect(ctx,A.x+14,BASE+14,634,12,6); ctx.fill();
+  ctx.fillStyle='#4a5f80';
+  [285,678].forEach(wx=>{ rrect(ctx,wx-16,BASE+16,32,16,4); ctx.fill(); });
+
+  WHEELS.forEach(w=>{
+    ctx.beginPath();ctx.arc(w.x,w.y,w.r,0,Math.PI*2);
+    ctx.fillStyle='#050810';ctx.fill();
+    ctx.lineWidth=5;ctx.strokeStyle='#22d3ee';ctx.stroke();
+    ctx.beginPath();ctx.arc(w.x,w.y,w.r*0.55,0,Math.PI*2);
+    ctx.fillStyle='rgba(34,211,238,.20)';ctx.fill();
+    ctx.lineWidth=4;ctx.strokeStyle='rgba(34,211,238,.60)';ctx.stroke();
+    for(let i=0;i<6;i++){const a=i*Math.PI*2/6;
+      ctx.beginPath();ctx.moveTo(w.x,w.y);
+      ctx.lineTo(w.x+Math.cos(a)*w.r*0.5,w.y+Math.sin(a)*w.r*0.5);ctx.stroke();}
+    ctx.beginPath();ctx.arc(w.x,w.y,w.r*0.18,0,Math.PI*2);
+    ctx.fillStyle='#22d3ee';ctx.fill();
+  });
+
+  ctx.fillStyle='rgba(142,163,192,.75)';
+  ctx.font='12px sans-serif';ctx.textAlign='left';
+  ctx.fillText('车尾',A.x-38,BASE+22);
+  ctx.fillText('车头',B.x+14,BASE+22);
+}
+function drawGuide(){
+  ctx.setLineDash([10,10]);ctx.lineWidth=3;ctx.strokeStyle='rgba(34,211,238,.28)';
+  ctx.beginPath();ctx.moveTo(A.x,A.y);
+  ctx.bezierCurveTo(A.x+120,110,B.x-120,110,B.x,B.y);ctx.stroke();
+  ctx.setLineDash([]);
+  mark(A,'起点'); mark(B,'终点');
+}
+function drawBase(){ ctx.clearRect(0,0,W,H); drawChassis(); drawGuide(); }
+function drawLine(){
+  const p=state.pts; if(p.length<2) return;
+  ctx.lineWidth=9;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.strokeStyle=state.color.hex;
+  ctx.shadowColor=state.color.hex;ctx.shadowBlur=14;
+  ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);
+  for(let i=1;i<p.length;i++) ctx.lineTo(p[i].x,p[i].y);
+  ctx.stroke();ctx.shadowBlur=0;
+}
+function redraw(){drawBase();drawLine();}
+setInterval(()=>{ if(state.pts.length<2) drawBase(); }, 1200);
+
+let drawing=false;
+function pos(e){
+  const r=cv.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX);
+  const cy=(e.touches?e.touches[0].clientY:e.clientY);
+  return {x:(cx-r.left)*(W/r.width), y:(cy-r.top)*(H/r.height)};
+}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();drawing=true;state.pts=[pos(e)];redraw();});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();
+  const p=pos(e),last=state.pts[state.pts.length-1];
+  if(Math.hypot(p.x-last.x,p.y-last.y)<3)return;
+  state.pts.push(p);redraw();});
+window.addEventListener('pointerup',()=>{if(!drawing)return;drawing=false;validate();});
+
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function validate(){
+  const p=state.pts,h=$('drawHint');
+  if(p.length<5){h.className='hint';h.textContent='再多画一点吧～';$('genBtn').disabled=true;return;}
+  const s=p[0],e=p[p.length-1];
+  const ok1=dist(s,A)<50&&dist(e,B)<50, ok2=dist(s,B)<50&&dist(e,A)<50;
+  if(!ok1&&!ok2){h.className='hint';h.textContent='要从 ⭐起点 画到 ⭐终点 才算连起来哦～';$('genBtn').disabled=true;return;}
+  if(ok2) state.pts.reverse();
+  h.className='hint ok';
+  h.textContent='✅ 连好啦！一条'+describe(p).short+'的车顶线，点「AI 设计我的车」让 AI 开工';
+  $('genBtn').disabled=false;
+  $('sketchTip').textContent='AI 会直接拿到你画的这条线（线稿图）来设计车身。';
+}
+$('clearBtn').onclick=()=>{state.pts=[];$('drawHint').textContent='';$('sketchTip').textContent='';$('genBtn').disabled=true;redraw();};
+
+function describe(p){
+  const span=B.x-A.x, top=BASE-250;
+  const n=p.map(q=>({x:(q.x-A.x)/span, h:(BASE-q.y)/(BASE-top)}));
+  let maxH=0,xAt=0.5;
+  n.forEach(q=>{if(q.h>maxH){maxH=q.h;xAt=q.x;}});
+  const hFront=n[n.length-1].h,hRear=n[0].h;
+  let turns=0,prev=null;
+  for(let i=1;i<n.length;i++){
+    const s=Math.sign(n[i].h-n[i-1].h);
+    if(s!==0){if(prev!==null&&s!==prev)turns++;prev=s;}
+  }
+  const words=[];
+  words.push(maxH>0.78?'高高隆起的车顶':(maxH>0.5?'中等高度的车顶':'低伏贴地的流线车顶'));
+  words.push(xAt<0.35?'最高点靠车尾':(xAt>0.68?'最高点靠车头':'最高点在车身中部'));
+  words.push(turns>=4?'起伏波浪形车顶线':(turns>=2?'两段式车顶':'一笔流畅的平滑弧线'));
+  words.push(hFront>hRear+0.06?'车头略高于车尾':(hRear>hFront+0.06?'车尾略高于车头':'前后基本齐平'));
+  const short=maxH>0.78?'高高':(maxH>0.5?'中等':(turns>=4?'波浪':'低伏流畅'));
+  return {short,text:words.join('，'),maxH:+maxH.toFixed(2),turns};
+}
+
+/* ================= 线稿图：把画的那条线渲染成 1024² 轮廓 PNG，直接交给大模型 ================= */
+function buildSketch(){
+  const S=1024;
+  const c=document.createElement('canvas'); c.width=S; c.height=S;
+  const x=c.getContext('2d');
+  x.fillStyle='#ffffff'; x.fillRect(0,0,S,S);
+  const pad=48, s=Math.min((S-pad*2)/W,(S-pad*2)/H);
+  const ox=(S-W*s)/2, oy=(S-H*s)/2;
+  const m=p=>({x:ox+p.x*s, y:oy+p.y*s});
+  const p=state.pts.map(m), a=m(A), b=m(B);
+  const lw=Math.max(6,9*s);
+
+  x.beginPath();                                  // 车身闭合轮廓（车顶线 + 底盘）
+  x.moveTo(p[0].x,p[0].y);
+  for(let i=1;i<p.length;i++) x.lineTo(p[i].x,p[i].y);
+  x.lineTo(b.x,b.y); x.lineTo(a.x,a.y); x.closePath();
+  x.fillStyle='#e8ecf2'; x.fill();
+  x.strokeStyle='#111111'; x.lineWidth=lw; x.lineJoin='round'; x.lineCap='round'; x.stroke();
+
+  WHEELS.forEach(w=>{                             // 两个轮子
+    const c2=m(w), r=w.r*s;
+    x.beginPath(); x.arc(c2.x,c2.y,r,0,Math.PI*2);
+    x.fillStyle='#dfe4ea'; x.fill();
+    x.strokeStyle='#111111'; x.lineWidth=lw*0.8; x.stroke();
+    x.beginPath(); x.arc(c2.x,c2.y,r*0.35,0,Math.PI*2);
+    x.strokeStyle='#111111'; x.lineWidth=lw*0.6; x.stroke();
+  });
+
+  const gy=m({x:0,y:BASE+56}).y;                  // 地面线
+  x.strokeStyle='#9aa3ad'; x.lineWidth=Math.max(3,lw*0.4);
+  x.beginPath(); x.moveTo(m({x:0,y:0}).x, gy); x.lineTo(m({x:W,y:0}).x, gy); x.stroke();
+  return c.toDataURL('image/png');
+}
+
+/* ================= 使用者自己的模型配置（只存在本机浏览器，不上传、不入库） ================= */
+const CFG_KEY='kidcar_model_cfg';
+const DEF_MODEL={ark:'doubao-seedream-5-0-260128', openai:'gpt-image-1', tencent:'', mock:''};
+const DEF_BASE={ark:'https://ark.cn-beijing.volces.com/api/v3', openai:'https://api.openai.com/v1', tencent:'', mock:''};
+let modelCfg={provider:'ark', apiKey:'', secretId:'', secretKey:'', model:'', baseUrl:''};
+try{ Object.assign(modelCfg, JSON.parse(localStorage.getItem(CFG_KEY)||'{}')); }catch(e){}
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(modelCfg)); }catch(e){} }
+function cfgReady(){
+  if(modelCfg.provider==='mock') return true;
+  if(modelCfg.provider==='tencent') return !!(modelCfg.secretId&&modelCfg.secretKey);
+  return !!modelCfg.apiKey;
+}
+function cfgLabel(){
+  if(modelCfg.provider==='mock') return '本地试玩模式';
+  const m=modelCfg.model||DEF_MODEL[modelCfg.provider]||'默认模型';
+  return (modelCfg.provider==='ark'?'火山方舟':(modelCfg.provider==='openai'?'OpenAI':'腾讯云'))+' · '+m;
+}
+function openSet(){
+  $('setProvider').value=modelCfg.provider;
+  $('setKey').value=modelCfg.apiKey;
+  $('setSecretId').value=modelCfg.secretId;
+  $('setSecretKey').value=modelCfg.secretKey;
+  $('setModel').value=modelCfg.model||'';
+  $('setBase').value=modelCfg.baseUrl||'';
+  syncSetForm();
+  $('setModal').classList.add('on');
+}
+function syncSetForm(){
+  const p=$('setProvider').value;
+  $('rowKey').style.display=(p==='ark'||p==='openai')?'':'none';
+  $('rowTencent').style.display=(p==='tencent')?'':'none';
+  $('setModel').placeholder='留空则用默认：'+(DEF_MODEL[p]||'—');
+  $('setBase').placeholder='留空则用默认：'+(DEF_BASE[p]||'—');
+  const ok=(p==='mock')||(p==='tencent'?'':true);
+  $('setState').textContent=cfgReady()?( (p===modelCfg.provider)?'已配置':'未保存' ):'待填写';
+  $('setNote').innerHTML=noteByProvider(p);
+}
+function noteByProvider(p){
+  const common='<br><b>安全说明</b>：Key 只保存在你自己这台电脑的浏览器里（localStorage），'
+    + '每次生成时随请求发给本机 server.js，由它转发给模型厂商；后端不写文件、不记录日志、不会进 GitHub 仓库。'
+    + '换电脑 / 清浏览器缓存后需要重新填一次。';
+  if(p==='ark') return '在 <b>console.volcengine.com/ark</b> 开通「豆包图像创作模型」后，在「API Key 管理」里创建 Key（ark- 开头）。'
+    + '默认模型 <b>doubao-seedream-5-0-260128</b>（Seedream 5.0 Lite，约 0.2 元/张，需先在模型广场开通），'
+    + '也可填 <b>doubao-seedream-4-5-251128</b>。'+common;
+  if(p==='openai') return '填 OpenAI 或任意 OpenAI 兼容网关的 Key；默认模型 <b>gpt-image-1</b>。'
+    + '用第三方网关时把 Base URL 改成对方地址即可。'+common;
+  if(p==='tencent') return '在腾讯云控制台「访问密钥」里取 <b>SecretId / SecretKey</b>，并已开通混元生图服务。'+common;
+  return '不调用任何大模型，页面用本地绘制的汽车兜底，孩子照样能玩全套流程（选配置 → 画线 → 签名 → 下载）。'+common;
+}
+$('setBtn').onclick=openSet;
+$('closeSet').onclick=()=>$('setModal').classList.remove('on');
+$('setProvider').onchange=syncSetForm;
+$('saveSet').onclick=()=>{
+  modelCfg={
+    provider:$('setProvider').value,
+    apiKey:$('setKey').value.trim(),
+    secretId:$('setSecretId').value.trim(),
+    secretKey:$('setSecretKey').value.trim(),
+    model:$('setModel').value.trim(),
+    baseUrl:$('setBase').value.trim(),
+  };
+  saveCfg(); syncSetForm(); refreshBadge();
+  $('setModal').classList.remove('on');
+  $('dlTip').textContent=cfgReady()?('✅ 已保存：'+cfgLabel()):'⚠️ 还没填 Key，当前只能用本地试玩模式。';
+};
+$('clearSet').onclick=()=>{
+  modelCfg={provider:'ark',apiKey:'',secretId:'',secretKey:'',model:'',baseUrl:''};
+  try{ localStorage.removeItem(CFG_KEY); }catch(e){}
+  $('setKey').value='';$('setSecretId').value='';$('setSecretKey').value='';
+  $('setModel').value='';$('setBase').value='';$('setProvider').value='ark';
+  syncSetForm(); refreshBadge();
+};
+function refreshBadge(){
+  const b=$('modeBadge');
+  if(!apiOk){ b.className='badge off'; b.textContent='未连接本地服务'; return; }
+  if(!cfgReady()){ b.className='badge off'; b.textContent='未配置模型 Key（点 ⚙ 设置）'; return; }
+  b.className='badge'; b.textContent='AI 模型：'+cfgLabel();
+}
+
+/* ================= 后端连通性探测 ================= */
+let apiOk=false;
+async function probe(){
+  try{
+    const r=await fetch('/api/health');
+    const ct=r.headers.get('content-type')||'';
+    if(!r.ok||ct.indexOf('application/json')<0) throw new Error('不是本地服务');
+    await r.json();
+    apiOk=true;
+    refreshBadge();
+  }catch(e){
+    apiOk=false;
+    refreshBadge();
+  }
+}
+
+/* ================= AI 生成 ================= */
+$('genBtn').onclick=doGenerate;
+$('againBtn').onclick=doGenerate;
+function errTipOf(err){
+  let t='⚠️ AI 出图没成功（已用本地渲染顶上）：';
+  if(/404/.test(err)) t+='请求打到别的服务器了（HTTP 404）。请通过 http://localhost:8777 打开页面，也就是先运行 node server.js。';
+  else if(/not activated|ModelNotOpen/i.test(err)) t+='这个模型还没在服务商控制台开通（火山方舟需到「模型广场」逐个开通，开通后有 1–2 分钟生效延迟）。';
+  else if(/缺少 API Key|未配置模型/i.test(err)) t+='还没填 API Key —— 点右上角「⚙ 设置模型」，填你自己的 Key 后重试。';
+  else if(/401|Unauthorized|invalid api key|authentication/i.test(err)) t+='API Key 不对或已失效，检查「⚙ 设置模型」里填的内容。';
+  else if(/Failed to fetch|NetworkError|ECONNREFUSED/i.test(err)) t+='连不上本地服务，确认已运行 node server.js。';
+  else if(/quota|余额|insufficient/i.test(err)) t+='账号额度不足。';
+  else t+=err.slice(0,160);
+  return t;
+}
+async function doGenerate(){
+  if(!state.pts.length){$('drawHint').textContent='先画一条线连起车尾和车头～';showView('design');return;}
+  showView('work');
+  $('noDesign').style.display='none';
+  $('loader').classList.add('on');
+  $('resultBox').style.display='none';
+  $('finalWrap').style.display='none';
+  $('errTip').textContent='';
+  $('sketchFlag').textContent='';
+  state.composed=null; state.wallId=null;
+  const msgs=['AI 正在看你画的线…','AI 正在调色…','AI 正在搭车身…','AI 正在布置场景…','快好了，最后一道抛光…'];
+  let i=0;const t=setInterval(()=>{$('loadTxt').textContent=msgs[i++%msgs.length];},2200);
+  const d=describe(state.pts);
+  const payload={
+    carTypeId:state.type, carType:labelOf(CAR_TYPES,state.type), carTypeEn:enOf(CAR_TYPES,state.type),
+    styleId:state.style, styleName:labelOf(STYLES,state.style), styleEn:enOf(STYLES,state.style),
+    imagineId:state.imagine, imagineName:labelOf(IMAGINE,state.imagine),
+    colorName:state.color.name, colorHex:state.color.hex,
+    extras:[...state.extras].map(id=>labelOf(EXTRAS,id)),
+    outlineText:d.text, outlineMeta:{maxH:d.maxH,turns:d.turns},
+    sketch:buildSketch(),
+    cfg:{provider:modelCfg.provider, apiKey:modelCfg.apiKey, secretId:modelCfg.secretId,
+         secretKey:modelCfg.secretKey, model:modelCfg.model, baseUrl:modelCfg.baseUrl}
+  };
+  try{
+    if(!apiOk) await probe();
+    if(!apiOk) throw new Error('本地服务未连接（HTTP 404）');
+    if(!cfgReady()) throw new Error('未配置模型：请在右上角「⚙ 设置模型」里填自己的 API Key');
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const ct=r.headers.get('content-type')||'';
+    if(!r.ok||ct.indexOf('application/json')<0) throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error||'fail');
+    state.img=j.image; state.prompt=j.prompt; state.provider=j.provider||'ai';
+    state.sketchUsed=!!j.sketchUsed;
+    $('errTip').textContent='';
+    $('sketchFlag').textContent = state.sketchUsed
+      ? '🧩 本次把你画的线稿原图交给了 AI（不是文字描述）'
+      : '🧩 本次未使用线稿图（服务端未开启或接口未接受）';
+    pushWall(j.image,{car:labelOf(CAR_TYPES,state.type),style:labelOf(STYLES,state.style),color:state.color.name},true);
+  }catch(e){
+    const err=String(e.message||e);
+    $('errTip').textContent=errTipOf(err);
+    state.img=localArt();
+    state.prompt='（本地渲染）'+labelOf(CAR_TYPES,state.type)+' · '+state.color.name+' · '+labelOf(STYLES,state.style)+' · '+d.text;
+    state.provider='local'; state.sketchUsed=false;
+    $('sketchFlag').textContent='';
+    pushWall(state.img,{car:labelOf(CAR_TYPES,state.type),style:labelOf(STYLES,state.style),color:state.color.name},true);
+  }
+  clearInterval(t);
+  $('loader').classList.remove('on');
+  $('shot').src=state.img;
+  $('promptTxt').textContent=state.prompt;
+  $('finalWrap').style.display='none'; $('dlBtn').disabled=true;
+  $('dlTip').textContent='签名后点「生成最终图片」，确认满意再下载。';
+  $('resultBox').style.display='grid';
+}
+$('togglePrompt').onclick=()=>{
+  const box=$('promptTxt');
+  box.style.display = box.style.display==='none' ? '':'none';
+};
+
+/* ================= 签名 ================= */
+const sc=$('sign'), sx=sc.getContext('2d');
+const SW=620,SH=190; sc.width=SW*dpr; sc.height=SH*dpr; sx.scale(dpr,dpr);
+function signGuide(){
+  sx.clearRect(0,0,SW,SH);
+  sx.strokeStyle='rgba(34,211,238,.35)';sx.lineWidth=3;sx.setLineDash([8,8]);
+  sx.beginPath();sx.moveTo(40,SH-40);sx.lineTo(SW-40,SH-40);sx.stroke();sx.setLineDash([]);
+  sx.strokeStyle='#22d3ee';sx.lineWidth=5;sx.lineCap='round';sx.lineJoin='round';
+}
+signGuide();
+let sdraw=false;
+function spos(e){const r=sc.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX),cy=(e.touches?e.touches[0].clientY:e.clientY);
+  return {x:(cx-r.left)*(SW/r.width),y:(cy-r.top)*(SH/r.height)};}
+sc.addEventListener('pointerdown',e=>{e.preventDefault();sdraw=true;state.signed=true;sx.beginPath();const p=spos(e);sx.moveTo(p.x,p.y);});
+sc.addEventListener('pointermove',e=>{if(!sdraw)return;e.preventDefault();const p=spos(e);sx.lineTo(p.x,p.y);sx.stroke();});
+window.addEventListener('pointerup',()=>sdraw=false);
+$('clearSign').onclick=()=>{signGuide();state.signed=false;};
+
+/* 落款字体：有设计感的彩色渐变小字，日期用纯数字 */
+const SIMPLE_FONT='"PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+const fmtDate=()=>{const d=new Date();const p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate());};
+/* 签名专用：手写感更强、带斜体的字体栈 */
+const SIGN_FONT='"Segoe Script","Bradley Hand","Snell Roundhand","Xingkai SC","STXingkai","Kaiti SC",' + SIMPLE_FONT;
+const INK=['#00d3f5','#7c5cff','#ff5fa2'];   // 青 → 紫 → 粉 渐变
+
+/* 手写笔迹在 UI 里是青色；落到图上改成同色系渐变，更有设计感 */
+function inkSign(){
+  const t=document.createElement('canvas');
+  t.width=sc.width; t.height=sc.height;
+  const c=t.getContext('2d');
+  c.drawImage(sc,0,0);
+  c.globalCompositeOperation='source-in';
+  const g=c.createLinearGradient(0,0,t.width,t.height);
+  g.addColorStop(0,INK[0]); g.addColorStop(.55,INK[1]); g.addColorStop(1,INK[2]);
+  c.fillStyle=g; c.fillRect(0,0,t.width,t.height);
+  return t;
+}
+
+/* ================= 合成 / 下载 ================= */
+const OUT_W=1400;
+let composedName='';
+function composeNow(){
+  if(!state.img){$('dlTip').textContent='还没有作品，先点「AI 设计我的车」～';return;}
+  composedName=($('nameInput').value||'').trim()||'小小设计师';
+  const img=new Image();
+  img.onload=()=>{
+    const w=OUT_W, h=Math.round(img.height*(OUT_W/img.width));
+    const out=document.createElement('canvas');
+    out.width=w;out.height=h;
+    const o=out.getContext('2d');
+    o.drawImage(img,0,0,w,h);
+
+    // 右上角落款：彩色渐变小字（签名 + 日期），无底衬、无信息栏
+    const pad=Math.round(w*0.030);
+    const fs=Math.max(13,Math.round(h*0.0175));   // 小号字体
+    const sigH=Math.max(28,Math.round(h*0.046));  // 手写签名
+    const sigW=Math.round(sigH*(SW/SH));
+    const gap=Math.round(fs*0.45);
+    const name=($('nameInput').value||'').trim();
+    const useSign=!!state.signed;
+
+    // 右上角定位
+    const by=pad;
+    const rightX=w-pad;
+
+    o.textAlign='right'; o.textBaseline='alphabetic';
+    o.save();
+    o.shadowColor='rgba(255,255,255,.85)'; o.shadowBlur=Math.max(2,fs*0.22);
+    o.shadowOffsetX=0; o.shadowOffsetY=0;
+
+    // 名字/签名：彩色渐变
+    const gi=o.createLinearGradient(rightX-(useSign?sigW:fs*5),0,rightX,0);
+    gi.addColorStop(0,INK[0]); gi.addColorStop(.55,INK[1]); gi.addColorStop(1,INK[2]);
+
+    if(useSign){
+      o.drawImage(inkSign(),rightX-sigW,by,sigW,sigH);
+      o.fillStyle=gi;
+      o.font='600 '+Math.round(fs*0.92)+'px '+SIMPLE_FONT;
+      o.fillText(fmtDate(),rightX,by+sigH+gap+fs*0.85);
+    }else{
+      o.fillStyle=gi;
+      o.font='600 '+Math.round(fs*1.08)+'px '+SIGN_FONT;
+      o.fillText(name||'小小设计师',rightX,by+fs*1.0);
+      o.font='500 '+Math.round(fs*0.86)+'px '+SIMPLE_FONT;
+      const g2=o.createLinearGradient(rightX-fs*4,0,rightX,0);
+      g2.addColorStop(0,INK[1]); g2.addColorStop(1,INK[2]);
+      o.fillStyle=g2;
+      o.fillText(fmtDate(),rightX,by+fs*1.0+gap+fs*0.9);
+    }
+    o.restore();
+
+    const url=out.toDataURL('image/png');
+    state.composed=url;
+    $('finalPreview').src=url;
+    $('finalWrap').style.display='';
+    $('dlBtn').disabled=false;
+    $('dlTip').textContent='✅ 已生成最终图片（只保留最新一版）。可点「下载」。';
+    pushWall(url,{car:labelOf(CAR_TYPES,state.type),style:labelOf(STYLES,state.style),color:state.color.name,name:composedName},true);
+  };
+  img.src=state.img;
+}
+$('composeBtn').onclick=composeNow;
+$('dlBtn').onclick=()=>{
+  if(!state.composed){$('dlTip').textContent='先点「生成最终图片」～';return;}
+  const a=document.createElement('a');
+  a.href=state.composed;
+  a.download='AI汽车设计-'+composedName+'-'+new Date().toISOString().slice(0,10)+'.png';
+  a.click();
+  $('dlTip').textContent='⬇️ 已下载到浏览器下载目录～';
+};
+
+/* ================= 照片墙 ================= */
+function makeThumb(src){
+  const img=new Image(); img.src=src;
+  return new Promise(res=>{
+    const done=()=>{
+      const tw=480, th=Math.round(img.height*(tw/img.width));
+      const c=document.createElement('canvas');c.width=tw;c.height=th;
+      c.getContext('2d').drawImage(img,0,0,tw,th);
+      res(c.toDataURL('image/jpeg',0.72));
+    };
+    if(img.complete) done(); else { img.onload=done; img.onerror=()=>res(src); }
+  });
+}
+let wallCache=[];
+function loadWall(){
+  try{ wallCache=JSON.parse(localStorage.getItem('kidcar_wall')||'[]'); }catch(e){ wallCache=[]; }
+  return wallCache;
+}
+function saveWall(g){
+  for(let n=0;n<3;n++){
+    try{ localStorage.setItem('kidcar_wall',JSON.stringify(g)); return true; }
+    catch(e){ g=g.slice(0, Math.max(10, Math.floor(g.length/2))); }
+  }
+  return false;
+}
+async function pushWall(dataUrl, meta, replaceLatest){
+  const thumb=await makeThumb(dataUrl);
+  let g=loadWall();
+  if(replaceLatest && state.wallId){
+    const i=g.findIndex(x=>x.id===state.wallId);
+    if(i>=0){ g[i]={id:state.wallId, thumb, meta, t:Date.now()}; saveWall(g); renderWall(state.wallId); return; }
+  }
+  const id=Date.now()+Math.floor(Math.random()*1000);
+  if(replaceLatest) state.wallId=id;
+  g.unshift({id, thumb, meta, t:Date.now()});
+  g=g.slice(0,WALL_MAX);
+  saveWall(g);
+  renderWall(id);
+}
+function renderWall(hi){
+  const g=loadWall();
+  $('wallCount').textContent=g.length+' 张';
+  $('tabWorkCount').textContent=g.length?('· '+g.length):'';
+  $('recentEmpty').style.display=g.length?'none':'';
+  $('allEmpty').style.display=g.length?'none':'';
+  const cap=m=>((m.car||'')+' · '+(m.style||''))+(m.name?(' · '+m.name):'');
+  ['recentWall','allWall'].forEach(hostId=>{
+    const host=$(hostId); if(!host) return;
+    host.innerHTML='';
+    const list = hostId==='recentWall' ? g.slice(0,RECENT_N) : g;
+    list.forEach((it,i)=>{
+      const f=document.createElement('figure');
+      f.style.animationDelay=(Math.min(i,8)*70)+'ms';
+      if(hi && it.id===hi) f.style.boxShadow='0 0 0 2px rgba(34,211,238,.6)';
+      f.innerHTML='<img src="'+it.thumb+'" alt="作品"><figcaption>'+cap(it.meta||{})+'</figcaption>';
+      f.onclick=()=>openLight(it.thumb);
+      host.appendChild(f);
+    });
+  });
+}
+function openLight(src){
+  $('lightImg').src=src; $('lightbox').classList.add('on');
+  $('lightDl').onclick=()=>{
+    const a=document.createElement('a');a.href=src;
+    a.download='AI汽车设计-'+Date.now()+'.jpg';a.click();
+  };
+}
+$('lightClose').onclick=()=>$('lightbox').classList.remove('on');
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))$('lightbox').classList.remove('on');};
+$('wallBtn').onclick=()=>{renderWall();$('wallModal').classList.add('on');};
+$('closeWall').onclick=()=>$('wallModal').classList.remove('on');
+$('wallModal').onclick=e=>{if(e.target===$('wallModal'))$('wallModal').classList.remove('on');};
+
+/* ================= 本地渲染兜底 ================= */
+function localArt(){
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  const p=state.pts,st=state.style,col=state.color.hex;
+  const bg={cyber:['#141a2e','#2b1b4d'],future:['#eef3fb','#dde7f7'],retro:['#fdf3e3','#f6dcc0'],
+            anime:['#eaf6ff','#ffeef6'],sport:['#0f1729','#1b2740'],minecraft:['#7ec8f5','#a8e06a']}[st];
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,bg[0]);g.addColorStop(1,bg[1]);
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  if(st==='minecraft'){
+    for(let i=0;i<28;i++){
+      x.fillStyle=i%2?'rgba(120,200,90,.35)':'rgba(90,160,70,.28)';
+      x.fillRect(Math.random()*W,BASE+50+Math.random()*60,60,30);
+    }
+    for(let i=0;i<5;i++){
+      x.fillStyle='rgba(255,255,255,.55)';
+      x.fillRect(60+i*180,60+Math.random()*60,90+Math.random()*60,40);
+    }
+  }
+  if(st==='cyber'){
+    for(let i=0;i<26;i++){
+      x.fillStyle='rgba(0,255,225,'+(0.05+Math.random()*0.12)+')';
+      x.fillRect(Math.random()*W,BASE+58+Math.random()*40,Math.random()*160+40,3);
+    }
+  }
+  if(st==='sport'){
+    x.strokeStyle='rgba(34,211,238,.25)';x.lineWidth=4;
+    for(let i=0;i<7;i++){const y=90+i*34;x.beginPath();x.moveTo(0,y);x.lineTo(120+Math.random()*220,y);x.stroke();}
+  }
+  x.fillStyle='rgba(0,0,0,.20)';
+  x.beginPath();x.ellipse(480,BASE+64,320,15,0,0,Math.PI*2);x.fill();
+  x.beginPath();x.moveTo(A.x,A.y);
+  for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);
+  x.lineTo(B.x,B.y);x.lineTo(A.x,A.y);x.closePath();
+  const bgd=x.createLinearGradient(0,60,0,BASE);
+  bgd.addColorStop(0,lighten(col,.28));bgd.addColorStop(.55,col);bgd.addColorStop(1,darken(col,.30));
+  x.fillStyle=bgd;x.fill();
+  x.lineWidth=(st==='anime'||st==='minecraft')?7:4;
+  x.strokeStyle=(st==='cyber')?'#00ffe1':'rgba(0,0,0,.6)';
+  if(st==='cyber'){x.shadowColor='#00ffe1';x.shadowBlur=18;}
+  x.stroke();x.shadowBlur=0;
+  const ys=p.map(q=>q.y),minY=Math.min.apply(null,ys);
+  x.beginPath();
+  const i0=Math.floor(p.length*0.18), i1=Math.floor(p.length*0.72);
+  x.moveTo(p[i0].x+10,p[i0].y+34);
+  for(let i=i0;i<i1;i++)x.lineTo(p[i].x,p[i].y+30);
+  x.lineTo(p[i1].x-10,minY+(BASE-minY)*0.55);
+  x.closePath();
+  x.fillStyle=(st==='cyber')?'rgba(0,255,225,.55)':'rgba(255,255,255,.72)';x.fill();
+  x.lineWidth=3;x.strokeStyle='rgba(0,0,0,.35)';x.stroke();
+  x.fillStyle='#fff6c8';x.beginPath();x.ellipse(B.x-26,B.y-26,15,10,-.2,0,Math.PI*2);x.fill();
+  x.fillStyle='#ff5a4d';x.beginPath();x.ellipse(A.x+26,A.y-26,12,9,.2,0,Math.PI*2);x.fill();
+  const big=state.extras.has('bigwheel')||state.type==='offroad';
+  WHEELS.forEach(w=>{
+    const r=big?w.r*1.18:w.r;
+    x.beginPath();x.arc(w.x,w.y,r,0,Math.PI*2);x.fillStyle='#22262d';x.fill();
+    x.lineWidth=6;x.strokeStyle='#4a515c';
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;
+      x.beginPath();x.moveTo(w.x+Math.cos(a)*r*.72,w.y+Math.sin(a)*r*.72);
+      x.lineTo(w.x+Math.cos(a)*r,w.y+Math.sin(a)*r);x.stroke();}
+    x.beginPath();x.arc(w.x,w.y,r*.42,0,Math.PI*2);
+    x.fillStyle='#d7dee8';x.fill();
+    x.strokeStyle='#8b98a8';x.lineWidth=3;x.stroke();
+  });
+  if(state.extras.has('wing')){
+    const t=p[p.length-1];
+    x.fillStyle=darken(col,.2);
+    rrect(x,B.x-96,t.y+4,86,12,4);x.fill();rrect(x,B.x-92,t.y+16,10,22,3);x.fill();
+  }
+  if(state.extras.has('rack')){
+    const m=p[Math.floor(p.length/2)];
+    x.strokeStyle='#6b7684';x.lineWidth=6;rrect(x,m.x-110,m.y-6,220,26,8);x.stroke();
+  }
+  if(state.extras.has('neon')){
+    x.strokeStyle='#00ffe1';x.lineWidth=5;x.shadowColor='#00ffe1';x.shadowBlur=16;
+    x.beginPath();x.moveTo(A.x+18,BASE-8);x.lineTo(B.x-18,BASE-8);x.stroke();x.shadowBlur=0;
+  }
+  if(state.extras.has('star')){
+    x.fillStyle='#fff';for(let i=0;i<9;i++){
+      const cx=120+Math.random()*720,cy=90+Math.random()*180,rr=7+Math.random()*7;
+      x.beginPath();for(let k=0;k<10;k++){const a=k*Math.PI/5-Math.PI/2,r2=k%2?rr*.45:rr;
+        x.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);}x.closePath();x.fill();}
+  }
+  if(state.extras.has('flame')){
+    for(let i=0;i<5;i++){const px=A.x+30+i*120;
+      x.fillStyle=i%2?'#ff8a3d':'#ffcf3d';
+      x.beginPath();x.moveTo(px,BASE-30);x.quadraticCurveTo(px+22,BASE-70,px+8,BASE-96);
+      x.quadraticCurveTo(px+34,BASE-58,px+26,BASE-30);x.closePath();x.fill();}
+  }
+  if(state.extras.has('pixel')){
+    for(let i=0;i<8;i++){
+      x.fillStyle='rgba(255,255,255,.5)';
+      x.fillRect(100+Math.random()*700,80+Math.random()*160,26,26);
+    }
+  }
+  return c.toDataURL('image/png');
+}
+function darken(hex,p){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=Math.round(r*(1-p));g=Math.round(g*(1-p));b=Math.round(b*(1-p));
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function lighten(hex,p){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=Math.round(r+(255-r)*p);g=Math.round(g+(255-g)*p);b=Math.round(b+(255-b)*p);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+/* ================= 启动（必须放最后：依赖上面的 canvas/ctx 初始化） ================= */
+refreshAll();
+renderWall();
+probe();
+if(!cfgReady()) setTimeout(openSet, 400);   // 第一次打开，引导使用者填自己的 Key
+</script>
+</body>
+</html>

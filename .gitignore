@@ -1,0 +1,6 @@
+# 本地生成的配置（含密钥）与日志，不要提交
+config.json
+*.log
+node_modules/
+.DS_Store
+Thumbs.db
